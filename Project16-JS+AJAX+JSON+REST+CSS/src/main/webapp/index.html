@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Filmovi</title>
+		<style>
+			.centerImg {
+			    display: block;
+			    margin-left: auto;
+			    margin-right: auto;
+			}
+			.centerH1 {
+				text-align: center;
+			}
+			.myButton {
+			    background-color: DarkMagenta;
+			    border: none;
+			    color: white;
+			    padding: 15px 32px;
+			    text-align: center;
+			    text-decoration: none;
+			    display: inline-block;
+			    font-size: 16px;
+			    margin: 4px 2px;
+			    cursor: pointer;
+			    border-radius: 5px;
+			}
+			.thumb {
+				 border: none;
+				 margin: 10px 10px;
+				 border-radius: 3px;
+			}
+			#wrapper {
+			  text-align: center;
+			}
+		</style>
+		<script type="text/javascript">
+			function getAjax() {
+					if (window.XMLHttpRequest) {
+					return new XMLHttpRequest();
+				} else {
+					return new ActiveXObject("Microsoft.XMLHTTP");
+				}
+			}
+		
+			function getSegment(id) {
+				name = document.getElementById(id).src.split("=")[1];
+				let xmlhttp = getAjax();
+				
+				xmlhttp.onreadystatechange = function() {
+					if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+						let text = xmlhttp.responseText;
+						let segment = JSON.parse(text);
+						html = "<h1 class=\"centerH1\">" + segment.title + "</h1><br>" +
+								"<img class=\"centerImg\" src=\"" + segment.name + "\">" +
+								"<br><h3 class=\"centerH1\">Tags: ";
+						
+						for (let i = 0; i < segment.tags.length; i++) {
+							html += segment.tags[i];
+							if (i+1 != segment.tags.length) {
+								html += ", ";
+							}
+						}
+						
+						document.getElementById("image").innerHTML = html + "</h3>";
+					}
+				}
+				
+				xmlhttp.open("GET", "rest/gallery/segment/" + name, true);
+				xmlhttp.send();
+			}
+			
+ 			function getTag(id) {
+ 				let tag = document.getElementById(id).value;
+ 				let xmlhttp = getAjax();
+				
+				xmlhttp.onreadystatechange = function() {
+					if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+						let text = xmlhttp.responseText;
+						let data = JSON.parse(text);
+						html = "";
+						
+						for(let i=0; i < data.thumbs.length; i++) {
+							html += "<img class=\"thumb\" id=" + 50+i + " onclick=\"getSegment(this.id);\" src=\"" +
+									data.thumbs[i].name + "\" height=\"150\" width=\"150\">";
+						}
+						
+						document.getElementById("thumbnails").innerHTML = html;
+					}
+				}
+				
+				xmlhttp.open("GET", "rest/gallery/tags/" + tag, true);
+				xmlhttp.send();
+ 			}
+			
+ 			
+ 			
+			function loadMe() {
+				let xmlhttp = getAjax();
+					
+				xmlhttp.onreadystatechange = function() {
+					if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+						let text = xmlhttp.responseText;
+						let data = JSON.parse(text);
+						html = html = "<div id=\"wrapper\">";
+						
+						for(let i=0; i < data.tags.length; i++) {
+							html += "<button class=\"myButton\" id=" + i + " value=\"" + data.tags[i] + 
+									"\" onclick=\"getTag(this.id);\">" + data.tags[i] + "</button>";
+						}
+						
+						document.getElementById("tags").innerHTML = html + "</div>";
+					}
+				}
+				
+				xmlhttp.open("GET", "rest/gallery/tags", true);
+				xmlhttp.send();	
+			}
+			</script>
+	</head>
+	<body>
+		<h1 class="centerH1">Najbolje rangirani filmovi prema IMDB ljestvici</h1>
+		
+		<div id="tags">&nbsp;</div>
+		<div id="thumbnails">&nbsp;</div>
+		<div id="image">&nbsp;</div>
+		
+		<script>loadMe();</script>
+	</body>
+</html>
